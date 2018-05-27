@@ -51,29 +51,41 @@ def withdraw(b,accounts)
         value = val = getUserInput
         max = max_amount(b)
 
-        copy = Hash.new
-        make_copy(b,copy)
+        tmp_b = Hash.new
+        restore = {}
+        i = 0
+        make_copy(b,tmp_b)
+        make_copy(tmp_b,restore)
 
         return puts("You don`t have enough funds on your balance") if (value > @current_user["balance"])
         return puts("Maximum amount available in this ATM is#{max}, please enter a smaller value") if(value > max)
 
-        b.each_key {|key|
-        until(val<key || b[key] == 0) do
-            val -= key
-            b[key] -= 1
+        while !tmp_b.empty? do
+        i += 1
+        val = value
+            tmp_b.each_key {|key|
+            until(val<key || tmp_b[key] == 0) do
+                val -= key
+                tmp_b[key] -= 1
+            end
+            }
+            
+            if(val == 0)
+            then
+                tmp_b.each_key {|key|
+                b[key] = tmp_b[key]
+                }
+                @current_user["balance"] -= value
+                accounts.update(@current_user)
+                @balance_changed = true
+                return puts("Your new balance is #{@current_user["balance"]}")
+            else
+            make_copy(restore,tmp_b)
+            i.times {tmp_b.shift}
+            end
         end
-        }
-        
-        if(val == 0)
-        then
-            @current_user["balance"] -= value
-            accounts.update(@current_user)
-            @balance_changed = true
-            return puts("Your new balance is #{@current_user["balance"]}")
-        else
-        make_copy(copy,b)    
         return puts("ERROR: THE AMOUNT YOU REQUESTED CANNOT BE COMPOSED FROM BILLS AVAILABLE IN THIS ATM. PLEASE ENTER A DIFFERENT AMOUNT:")
-        end
+    
     end
     
 end
@@ -96,6 +108,7 @@ loop do
             loop do
                 break if @balance_changed
             withdraw(b,accounts)
+            print b
             end
         when 3
             puts("\nHave a nice day,#{@current_user["name"]}")
