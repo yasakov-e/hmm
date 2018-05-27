@@ -56,7 +56,6 @@ def withdraw(b,accounts)
         i = 0
         make_copy(b,tmp_b)
         make_copy(tmp_b,restore)
-
         return puts("You don`t have enough funds on your balance") if (value > @current_user["balance"])
         return puts("Maximum amount available in this ATM is#{max}, please enter a smaller value") if(value > max)
 
@@ -81,6 +80,7 @@ def withdraw(b,accounts)
                 return puts("Your new balance is #{@current_user["balance"]}")
             else
             make_copy(restore,tmp_b)
+            tmp_b = Hash[tmp_b.to_a.sort.reverse]
             i.times {tmp_b.shift}
             end
         end
@@ -108,7 +108,6 @@ loop do
             loop do
                 break if @balance_changed
             withdraw(b,accounts)
-            print b
             end
         when 3
             puts("\nHave a nice day,#{@current_user["name"]}")
